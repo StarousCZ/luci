@@ -7,7 +7,7 @@
     {
       "repository": "StarousCZ/luci",
     }
-  ]
+  ],
   "ignorePaths": [
     // Keep original Dockerfile untouched
     "src/app/Dockerfile$",
