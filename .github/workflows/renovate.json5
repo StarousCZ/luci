@@ -1,0 +1,62 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  automerge: true,
+  automergeType: "branch",
+  "ignorePaths": [
+    // Keep original Dockerfile untouched
+    "src/app/Dockerfile$",
+    // Keep original application + dependencies untouched
+    "src/app/package.json",
+  ],
+  ignoreTests: true,
+  labels: [
+    "renovate",
+    "renovate/{{replace '.*/' '' depName}}",
+    "renovate/{{updateType}}",
+  ],
+  packageRules: [
+    {
+      matchUpdateTypes: ["patch"],
+    },
+    {
+      description: "Ignore frequent renovate updates",
+      enabled: false,
+      matchPackageNames: ["renovatebot/github-action"],
+      matchUpdateTypes: ["patch"],
+    },
+    {
+      ignoreTests: false,
+      matchPackageNames: ["renovatebot/github-action"],
+      matchUpdateTypes: ["minor"],
+      schedule: ["* 0,2,4 1-7 * 0"],
+    },
+    {
+      description: "Update all github-actions by default",
+      ignoreTests: false,
+      matchManagers: ["github-actions"],
+    },
+    {
+      matchDatasources: ["docker"],
+      matchPaths: ["**/Dockerfile*ubi*"],
+      matchPackagePatterns: ["registry.access.redhat.com/ubi9/nodejs-.*"],
+      versioning: "regex:^(?<major>\\d+)-(?<minor>\\d+)\\.*(?<patch>\\d*)$",
+    },
+  ],
+  prBodyTemplate: "{{{table}}}{{{notes}}}{{{changelogs}}}",
+  rebaseWhen: "behind-base-branch",
+  regexManagers: [
+    {
+      extractVersionTemplate: "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",
+      fileMatch: ["\\.ya?ml$", "\\.md$"],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*[=:]\\s*"?(?<currentValue>.+?)"?\\s',
+      ],
+      versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
+    },
+  ],
+  separateMinorPatch: true,
+  vulnerabilityAlerts: {
+    commitMessagePrefix: "chore(renovate): Security update",
+    labels: ["security"],
+  },
+}
